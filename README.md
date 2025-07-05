@@ -1,6 +1,6 @@
-# 💰 Sistema de Comisiones Comerciales - SERSA SAECA
+# 🎁 Sistema de Bonos Comerciales - SERSA SAECA
 
-Sistema web modular para calcular comisiones comerciales con configuraciones personalizadas por asesor.
+Sistema web modular para calcular bonos comerciales con configuraciones personalizadas por asesor.
 
 ## 📁 Estructura del Repositorio
 
@@ -22,7 +22,7 @@ Comisiones-Sersa-1/
 
 - ✅ **Sistema modular**: Cada asesor tiene su propia instancia independiente
 - ✅ **Panel de administración**: Configuración completa de metas, premios y multiplicadores
-- ✅ **Cálculos automáticos**: Sistema de comisiones con validaciones en tiempo real
+- ✅ **Cálculos automáticos**: Sistema de bonos con validaciones en tiempo real
 - ✅ **Reportes PDF**: Generación automática de reportes profesionales
 - ✅ **Dashboard ejecutivo**: Análisis avanzado de coherencia de metas
 - ✅ **Almacenamiento local**: Configuraciones guardadas automáticamente
@@ -61,7 +61,7 @@ Cada carpeta de asesor contiene:
 - **`app.js`** - Lógica principal y cálculos
 - **`reports.js`** - Generador de reportes PDF
 - **`styles.css`** - Estilos principales
-- **`comisiones.css`** - Estilos específicos
+- **`bonos.css`** - Estilos específicos
 - **`README.md`** - Documentación específica
 
 ## 🔄 Agregar Nuevos Asesores
@@ -114,4 +114,4 @@ Esto es necesario porque el sistema está alojado en un hosting estático y no p
 
 ---
 
-**Desarrollado para SERSA SAECA** - Sistema de Comisiones Comerciales
+**Desarrollado para SERSA SAECA** - Sistema de Bonos Comerciales

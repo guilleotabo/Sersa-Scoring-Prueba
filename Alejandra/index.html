@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Comisiones Comerciales - SERSA SAECA</title>
+    <title>Sistema de Bonos Comerciales - SERSA SAECA</title>
     
 <link rel="stylesheet" href="styles.css">
-<link rel="stylesheet" href="comisiones.css">
+    <link rel="stylesheet" href="bonos.css">
 </head>
 <body>
     <!-- Pantalla de Login -->
@@ -15,7 +15,7 @@
             <div class="login-header">
                 <div class="login-icon">🔐</div>
                 <h2>Acceso al Sistema</h2>
-                <p>Sistema de Comisiones Comerciales</p>
+                <p>Sistema de Bonos Comerciales</p>
             </div>
             <div class="login-form">
                 <div class="input-group-login">
@@ -37,7 +37,7 @@
         <!-- Panel Izquierdo -->
         <div class="left-panel">
             <div class="header">
-                <h1>💰 Sistema de Comisiones Comerciales</h1>
+                <h1>💰 Sistema de Bonos Comerciales</h1>
                 <span id="saveIndicator"></span>
                 <div class="header-buttons">
                     <button class="header-btn" onclick="limpiarTodo()">🗑️ Limpiar</button>
@@ -61,7 +61,7 @@
                         <option value="4">Máster</option>
                         <option value="5">Genio</option>
                     </select>
-                    <div class="help-text">Para cálculo de carrera (menor de 2 meses)</div>
+                    <div class="help-text">Tu nivel de carrera del mes anterior (calculado por ti)</div>
                 </div>
                 
                 <!-- Volumen -->
@@ -126,8 +126,8 @@
                     <div class="llave-info" id="llaveInfo">
                         <div><strong>LLAVE HABILITADA:</strong></div>
                         <div class="llave-rules">
-                            <div>✅ 2/sem → habilita premio cantidad completo</div>
-                            <div>❌ Menos de 2/sem → sin premio cantidad</div>
+                                            <div>✅ 2/sem → habilita bono cantidad completo</div>
+                <div>❌ Menos de 2/sem → sin bono cantidad</div>
                         </div>
                     </div>
                 </div>
@@ -176,7 +176,7 @@
                         <option value="4">Máster</option>
                         <option value="5">Genio</option>
                     </select>
-                    <div class="help-text">Para premio equipo (desde Senior A)</div>
+                    <div class="help-text">Para bono equipo (desde Senior A)</div>
                 </div>
             </div>
         </div>
@@ -200,7 +200,7 @@
                     <span class="stat-value" id="statMulti">0%</span>
                 </div>
                 <div class="stat">
-                    <span class="stat-label">Comisión:</span>
+                    <span class="stat-label">Bono:</span>
                     <span class="stat-value" style="color: #2E7D32;" id="statComision">0 Gs</span>
                 </div>
             </div>
@@ -208,7 +208,7 @@
             <div class="results-container">
                 <!-- Fila 1: Monto Interno y Externo -->
                 <div class="card">
-                    <div class="card-title">📊 MONTO INTERNO - Meta desembolso | Premio comisión</div>
+                    <div class="card-title">📊 MONTO INTERNO - Meta desembolso | Bono</div>
                     <div class="progress-bar-container">
                         <div class="progress-bar" id="barraInterno"></div>
                     </div>
@@ -216,7 +216,7 @@
                 </div>
                 
                 <div class="card">
-                    <div class="card-title">💎 MONTO EXTERNO/REFERENCIADO - Meta | Premio</div>
+                    <div class="card-title">💎 MONTO EXTERNO/REFERENCIADO - Meta | Bono</div>
                     <div class="progress-bar-container">
                         <div class="progress-bar" id="barraExterno"></div>
                     </div>
@@ -225,7 +225,7 @@
                 
                 <!-- Fila 2: Cantidad y Recuperados -->
                 <div class="card">
-                    <div class="card-title">🎯 CANTIDAD DESEMBOLSOS - Meta | Premio | Llave</div>
+                    <div class="card-title">🎯 CANTIDAD DESEMBOLSOS - Meta | Bono | Llave</div>
                     <div class="progress-bar-container">
                         <div class="progress-bar" id="barraCantidad"></div>
                     </div>
@@ -233,7 +233,7 @@
                 </div>
                 
                 <div class="card">
-                    <div class="card-title">🔄 RECUPERADOS +3 MESES - Meta | Premio</div>
+                    <div class="card-title">🔄 RECUPERADOS +3 MESES - Meta | Bono</div>
                     <div class="progress-bar-container">
                         <div class="progress-bar" id="barraRecuperado"></div>
                     </div>
@@ -242,7 +242,7 @@
                 
                 <!-- Fila 3: Carrera y Equipo -->
                 <div class="card">
-                    <div class="card-title">📈 PREMIO CARRERA - Según menor nivel últimos 2 meses</div>
+                    <div class="card-title">📈 BONO CARRERA - Según menor nivel entre mes actual y anterior</div>
                     <div class="progress-bar-container">
                         <div class="progress-bar" id="barraCarrera"></div>
                     </div>
@@ -250,13 +250,13 @@
                 </div>
                 
                 <div class="card">
-                    <div class="card-title">👥 PREMIO EQUIPO - Según menor nivel del equipo</div>
+                    <div class="card-title">👥 BONO EQUIPO - Según menor nivel del equipo</div>
                     <div class="progress-bar-container">
                         <div class="progress-bar" id="barraEquipo"></div>
                     </div>
                     <div class="progress-info" id="infoEquipo"></div>
                     <div id="equipoRequisitos" style="margin-top: 8px; padding: 8px; background: #FFF3E0; border-radius: 4px; font-size: 11px; color: #E65100;">
-                        ⚠️ Necesitas estar en Senior A+ para cobrar premio equipo
+                        ⚠️ Necesitas estar en Senior A+ para cobrar bono equipo
                     </div>
                 </div>
                 
@@ -282,7 +282,7 @@
                 
                 <!-- Cálculo de Comisión y Sugerencias lado a lado -->
                 <div class="card full-width">
-                    <div class="card-title">💰 CÁLCULO DE COMISIÓN Y SUGERENCIAS</div>
+                    <div class="card-title">💰 CÁLCULO DE BONOS Y SUGERENCIAS</div>
                     <div class="commission-calculation">
                         <div class="calc-section">
                             <div class="calc-row">
@@ -325,7 +325,7 @@
                             </div>
                             
                             <div class="calc-total">
-                                <div class="calc-total-label">TOTAL COMISIÓN</div>
+                                <div class="calc-total-label">TOTAL BONOS</div>
                                 <div class="calc-total-value" id="totalComision">0 Gs</div>
                             </div>
                         </div>
@@ -343,17 +343,17 @@
                         <h4>📖 CÓMO SE DEFINE TU CARRERA</h4>
                         Tu nivel de carrera se determina por el <strong>MENOR</strong> nivel alcanzado entre:
                         <br>• Monto Interno + Monto Externo + Recuperados + Cantidad Desembolsos
-                        <br>• Se considera el menor de los últimos 2 meses para estabilidad
-                        <br>• NO se consideran: Premio Equipo ni penalizaciones
+                        <br>• Se considera el menor entre mes actual y anterior para estabilidad
+                        <br>• NO se consideran: Bono Equipo ni penalizaciones
                     </div>
                     
                     <div class="info-section quick-guide">
                         <h4>📚 GUÍA RÁPIDA</h4>
-                        • <strong>Llaves:</strong> Sin 6 desemb. no hay premio interno | 2/sem habilita premio cantidad
+                        • <strong>Llaves:</strong> Sin 6 desemb. no hay bono interno | 2/sem habilita bono cantidad
                         <br>• <strong>Multiplicadores:</strong> Se aplican en cadena (Conv × Emp × Proc)
                         <br>• <strong>Base fija:</strong> Siempre 3M, nunca se multiplica
-                        <br>• <strong>Equipo:</strong> Premio según menor nivel del equipo (desde Senior A)
-                        <br>• <strong>Meta vs Premio:</strong> Meta = monto a desembolsar | Premio = comisión que ganás
+                        <br>• <strong>Equipo:</strong> Bono según menor nivel del equipo (desde Senior A)
+                        <br>• <strong>Meta vs Bono:</strong> Meta = monto a desembolsar | Bono = lo que ganás
                     </div>
                 </div>
             </div>
@@ -371,7 +371,7 @@
                     <div class="admin-tabs">
                         <button class="admin-tab-btn active" data-tab="general">General</button>
                         <button class="admin-tab-btn" data-tab="metas">Metas</button>
-                        <button class="admin-tab-btn" data-tab="premios">Premios</button>
+                        <button class="admin-tab-btn" data-tab="bonos">Bonos</button>
                         <button class="admin-tab-btn" data-tab="multiplicadores">Multiplicadores</button>
                         <button class="admin-tab-btn" data-tab="dashboard">📊 Dashboard Ejecutivo</button>
                     </div>
@@ -386,7 +386,7 @@
                                     <table class="admin-table">
                                         <tr>
                                             <th>Título Principal</th>
-                                            <td><input type="text" id="admin-sistema-nombre" placeholder="💰 Sistema de Comisiones Comerciales"></td>
+                                            <td><input type="text" id="admin-sistema-nombre" placeholder="💰 Sistema de Bonos Comerciales"></td>
                                         </tr>
                                     </table>
                                 </div>
@@ -462,73 +462,73 @@
                         </div>
                     </div>
 
-                    <!-- Contenido de Pestaña: Premios -->
-                    <div id="tab-premios" class="admin-tab-content">
+                                    <!-- Contenido de Pestaña: Bonos -->
+                <div id="tab-bonos" class="admin-tab-content">
                         <div class="admin-grid">
                             <div>
-                                <h4>Premio Carrera (Gs)</h4>
+                                <h4>Bono Carrera (Gs)</h4>
                                 <table class="admin-table">
-                                    <tr><td class="nivel-name-0">Capilla</td><td><input type="text" id="admin-premio-carrera-0" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-1">Junior</td><td><input type="text" id="admin-premio-carrera-1" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-2">Senior A</td><td><input type="text" id="admin-premio-carrera-2" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-3">Senior B</td><td><input type="text" id="admin-premio-carrera-3" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-4">Máster</td><td><input type="text" id="admin-premio-carrera-4" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-5">Genio</td><td><input type="text" id="admin-premio-carrera-5" onkeyup="formatearAdminInput(this)"></td></tr>
+                                                                          <tr><td class="nivel-name-0">Capilla</td><td><input type="text" id="admin-bono-carrera-0" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-1">Junior</td><td><input type="text" id="admin-bono-carrera-1" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-2">Senior A</td><td><input type="text" id="admin-bono-carrera-2" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-3">Senior B</td><td><input type="text" id="admin-bono-carrera-3" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-4">Máster</td><td><input type="text" id="admin-bono-carrera-4" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-5">Genio</td><td><input type="text" id="admin-bono-carrera-5" onkeyup="formatearAdminInput(this)"></td></tr>
                                 </table>
                             </div>
                             <div>
-                                <h4>Premio Interno (Gs)</h4>
+                                <h4>Bono Interno (Gs)</h4>
                                 <table class="admin-table">
-                                    <tr><td class="nivel-name-0">Capilla</td><td><input type="text" id="admin-premio-interno-0" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-1">Junior</td><td><input type="text" id="admin-premio-interno-1" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-2">Senior A</td><td><input type="text" id="admin-premio-interno-2" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-3">Senior B</td><td><input type="text" id="admin-premio-interno-3" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-4">Máster</td><td><input type="text" id="admin-premio-interno-4" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-5">Genio</td><td><input type="text" id="admin-premio-interno-5" onkeyup="formatearAdminInput(this)"></td></tr>
+                                                                          <tr><td class="nivel-name-0">Capilla</td><td><input type="text" id="admin-bono-interno-0" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-1">Junior</td><td><input type="text" id="admin-bono-interno-1" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-2">Senior A</td><td><input type="text" id="admin-bono-interno-2" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-3">Senior B</td><td><input type="text" id="admin-bono-interno-3" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-4">Máster</td><td><input type="text" id="admin-bono-interno-4" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-5">Genio</td><td><input type="text" id="admin-bono-interno-5" onkeyup="formatearAdminInput(this)"></td></tr>
                                 </table>
                             </div>
                             <div>
-                                <h4>Premio Externo (Gs)</h4>
+                                <h4>Bono Externo (Gs)</h4>
                                 <table class="admin-table">
-                                    <tr><td class="nivel-name-0">Capilla</td><td><input type="text" id="admin-premio-externo-0" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-1">Junior</td><td><input type="text" id="admin-premio-externo-1" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-2">Senior A</td><td><input type="text" id="admin-premio-externo-2" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-3">Senior B</td><td><input type="text" id="admin-premio-externo-3" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-4">Máster</td><td><input type="text" id="admin-premio-externo-4" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-5">Genio</td><td><input type="text" id="admin-premio-externo-5" onkeyup="formatearAdminInput(this)"></td></tr>
+                                                                          <tr><td class="nivel-name-0">Capilla</td><td><input type="text" id="admin-bono-externo-0" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-1">Junior</td><td><input type="text" id="admin-bono-externo-1" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-2">Senior A</td><td><input type="text" id="admin-bono-externo-2" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-3">Senior B</td><td><input type="text" id="admin-bono-externo-3" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-4">Máster</td><td><input type="text" id="admin-bono-externo-4" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-5">Genio</td><td><input type="text" id="admin-bono-externo-5" onkeyup="formatearAdminInput(this)"></td></tr>
                                 </table>
                             </div>
                             <div>
-                                <h4>Premio Recuperados (Gs)</h4>
+                                <h4>Bono Recuperados (Gs)</h4>
                                 <table class="admin-table">
-                                    <tr><td class="nivel-name-0">Capilla</td><td><input type="text" id="admin-premio-recuperado-0" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-1">Junior</td><td><input type="text" id="admin-premio-recuperado-1" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-2">Senior A</td><td><input type="text" id="admin-premio-recuperado-2" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-3">Senior B</td><td><input type="text" id="admin-premio-recuperado-3" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-4">Máster</td><td><input type="text" id="admin-premio-recuperado-4" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-5">Genio</td><td><input type="text" id="admin-premio-recuperado-5" onkeyup="formatearAdminInput(this)"></td></tr>
+                                                                          <tr><td class="nivel-name-0">Capilla</td><td><input type="text" id="admin-bono-recuperado-0" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-1">Junior</td><td><input type="text" id="admin-bono-recuperado-1" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-2">Senior A</td><td><input type="text" id="admin-bono-recuperado-2" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-3">Senior B</td><td><input type="text" id="admin-bono-recuperado-3" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-4">Máster</td><td><input type="text" id="admin-bono-recuperado-4" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-5">Genio</td><td><input type="text" id="admin-bono-recuperado-5" onkeyup="formatearAdminInput(this)"></td></tr>
                                 </table>
                             </div>
                             <div>
-                                <h4>Premio Cantidad (Gs)</h4>
+                                <h4>Bono Cantidad (Gs)</h4>
                                 <table class="admin-table">
-                                    <tr><td class="nivel-name-0">Capilla</td><td><input type="text" id="admin-premio-cantidad-0" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-1">Junior</td><td><input type="text" id="admin-premio-cantidad-1" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-2">Senior A</td><td><input type="text" id="admin-premio-cantidad-2" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-3">Senior B</td><td><input type="text" id="admin-premio-cantidad-3" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-4">Máster</td><td><input type="text" id="admin-premio-cantidad-4" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-5">Genio</td><td><input type="text" id="admin-premio-cantidad-5" onkeyup="formatearAdminInput(this)"></td></tr>
+                                                                          <tr><td class="nivel-name-0">Capilla</td><td><input type="text" id="admin-bono-cantidad-0" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-1">Junior</td><td><input type="text" id="admin-bono-cantidad-1" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-2">Senior A</td><td><input type="text" id="admin-bono-cantidad-2" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-3">Senior B</td><td><input type="text" id="admin-bono-cantidad-3" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-4">Máster</td><td><input type="text" id="admin-bono-cantidad-4" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-5">Genio</td><td><input type="text" id="admin-bono-cantidad-5" onkeyup="formatearAdminInput(this)"></td></tr>
                                 </table>
                             </div>
                             <div>
-                                <h4>Premio Equipo (Gs)</h4>
+                                <h4>Bono Equipo (Gs)</h4>
                                 <table class="admin-table">
-                                    <tr><td class="nivel-name-0">Capilla</td><td><input type="text" id="admin-premio-equipo-0" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-1">Junior</td><td><input type="text" id="admin-premio-equipo-1" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-2">Senior A</td><td><input type="text" id="admin-premio-equipo-2" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-3">Senior B</td><td><input type="text" id="admin-premio-equipo-3" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-4">Máster</td><td><input type="text" id="admin-premio-equipo-4" onkeyup="formatearAdminInput(this)"></td></tr>
-                                    <tr><td class="nivel-name-5">Genio</td><td><input type="text" id="admin-premio-equipo-5" onkeyup="formatearAdminInput(this)"></td></tr>
+                                                                          <tr><td class="nivel-name-0">Capilla</td><td><input type="text" id="admin-bono-equipo-0" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-1">Junior</td><td><input type="text" id="admin-bono-equipo-1" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-2">Senior A</td><td><input type="text" id="admin-bono-equipo-2" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-3">Senior B</td><td><input type="text" id="admin-bono-equipo-3" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-4">Máster</td><td><input type="text" id="admin-bono-equipo-4" onkeyup="formatearAdminInput(this)"></td></tr>
+                                      <tr><td class="nivel-name-5">Genio</td><td><input type="text" id="admin-bono-equipo-5" onkeyup="formatearAdminInput(this)"></td></tr>
                                 </table>
                             </div>
                         </div>
@@ -670,14 +670,14 @@
                             <!-- Tabla de Análisis Principal -->
                             <div class="validation-main">
                                 <div class="validation-section">
-                                    <h4>🎯 RELACIÓN META vs PREMIO (Monto Interno)</h4>
+                                    <h4>🎯 RELACIÓN META vs BONO (Monto Interno)</h4>
                                     <div class="validation-table-container">
                                         <table class="validation-table" id="validation-table-interno">
                                             <thead>
                                                 <tr>
                                                     <th>Nivel</th>
                                                     <th>Meta (Gs)</th>
-                                                    <th>Premio (Gs)</th>
+                                                    <th>Bono (Gs)</th>
                                                     <th>% Rendimiento</th>
                                                 </tr>
                                             </thead>
@@ -689,14 +689,14 @@
                                 </div>
 
                                 <div class="validation-section">
-                                    <h4>💎 RELACIÓN META vs PREMIO (Monto Externo)</h4>
+                                    <h4>💎 RELACIÓN META vs BONO (Monto Externo)</h4>
                                     <div class="validation-table-container">
                                         <table class="validation-table" id="validation-table-externo">
                                             <thead>
                                                 <tr>
                                                     <th>Nivel</th>
                                                     <th>Meta (Gs)</th>
-                                                    <th>Premio (Gs)</th>
+                                                    <th>Bono (Gs)</th>
                                                     <th>% Rendimiento</th>
                                                 </tr>
                                             </thead>
@@ -708,15 +708,15 @@
                                 </div>
 
                                 <div class="validation-section">
-                                    <h4>🎯 RELACIÓN META vs PREMIO (Cantidad Desembolsos)</h4>
+                                    <h4>🎯 RELACIÓN META vs BONO (Cantidad Desembolsos)</h4>
                                     <div class="validation-table-container">
                                         <table class="validation-table" id="validation-table-cantidad">
                                             <thead>
                                                 <tr>
                                                     <th>Nivel</th>
                                                     <th>Meta (Cant.)</th>
-                                                    <th>Premio (Gs)</th>
-                                                    <th>Premio/Desemb.</th>
+                                                    <th>Bono (Gs)</th>
+                                                    <th>Bono/Desemb.</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="validation-tbody-cantidad">

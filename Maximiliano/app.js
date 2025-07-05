@@ -1,6 +1,6 @@
 // Cargar configuración desde config.js o localStorage
         function getConfig() {
-            const savedConfig = localStorage.getItem('comisionesConfig');
+            const savedConfig = localStorage.getItem('bonosConfig');
             return savedConfig ? JSON.parse(savedConfig) : CONFIG;
         }
         
@@ -228,40 +228,88 @@
                 maxMeta = 13;
             }
             
+                    // Calcular niveles: visual (mostrar en interfaz) vs con bono (para cálculos)
+        let nivelVisual = -1;
+        let nivelConBono = -1;
+            
+            if (valor >= 0) {
+                // Calcular nivel visual basado en el progreso real (nivel más alto alcanzado)
+                for (let i = niveles.length - 1; i >= 0; i--) {
+                    if (valor >= metas_array[i]) {
+                        nivelVisual = i;
+                        break;
+                    }
+                }
+                
+                // Si no alcanza ninguna meta pero tiene valor >= 0, mostrar al menos "Capilla" 
+                if (nivelVisual === -1 && valor >= 0) {
+                    nivelVisual = 0;
+                }
+                
+                            // Calcular nivel con bono (solo si alcanza metas exactas)
+            for (let i = 0; i < niveles.length; i++) {
+                if (valor >= metas_array[i]) {
+                    nivelConBono = i;
+                }
+            }
+            }
+            
             // Crear segmentos clickeables
             let html = '<div class="progress-segments">';
-            let nivelAlcanzado = -1;
             
             for (let i = 0; i < niveles.length; i++) {
                 const alcanzado = valor >= metas_array[i];
-                if (alcanzado) nivelAlcanzado = i;
-                
-                let className = 'progress-segment';
-                if (alcanzado) className += ' reached';
-                if (i === nivelAlcanzado) className += ' current';
-                
-                const metaTexto = tipo === 'cantidad' ? metas_array[i] : formatNumber(metas_array[i]/1000000) + 'M';
-                const premioTexto = formatNumber(pagos_array[i]);
-                
-                html += `<div class="${className}" onclick="cargarValor('${tipo}', ${metas_array[i]})" 
-                         title="Click para cargar ${metaTexto}">
-                    <div class="level">${niveles[i]}</div>
-                    <div class="meta">Meta: ${metaTexto}</div>
-                    <div class="premio">Premio: ${premioTexto}</div>
-                </div>`;
+                const esNivelVisual = i === nivelVisual;
+                            const esNivelConBono = i === nivelConBono;
+            
+            let className = 'progress-segment';
+            if (alcanzado) className += ' reached';
+            if (esNivelConBono) className += ' current';
+            if (esNivelVisual && !alcanzado) className += ' current-no-prize';
+            
+            const metaTexto = tipo === 'cantidad' ? metas_array[i] : formatNumber(metas_array[i]/1000000) + 'M';
+            const bonoTexto = formatNumber(pagos_array[i]);
+            
+            html += `<div class="${className}" onclick="cargarValor('${tipo}', ${metas_array[i]})" 
+                     title="Click para cargar ${metaTexto}">
+                <div class="level">${niveles[i]}</div>
+                <div class="meta">Meta: ${metaTexto}</div>
+                <div class="bono">Bono: ${bonoTexto}</div>
+            </div>`;
             }
             html += '</div>';
             container.innerHTML = html;
             
-            // Actualizar info
-            const progreso = Math.round((valor / maxMeta) * 100);
-            const nivelTexto = nivelAlcanzado >= 0 ? niveles[nivelAlcanzado] : 'Ninguno';
-            const premioTexto = nivelAlcanzado >= 0 ? formatNumber(pagos_array[nivelAlcanzado]) : '0';
-            
-            info.innerHTML = `Progreso total: ${tipo === 'cantidad' ? valor : formatNumber(valor)} de ${tipo === 'cantidad' ? maxMeta : formatNumber(maxMeta)} (${progreso}%)<br>
-                             Nivel alcanzado: <strong>${nivelTexto}</strong> | Premio: <strong>${premioTexto} Gs</strong>`;
-            
-            return nivelAlcanzado;
+                    // Actualizar info
+        const progreso = Math.round((valor / maxMeta) * 100);
+        let nivelTexto = 'Ninguno';
+        let bonoTexto = '0';
+        let mensajeExtra = '';
+        
+        if (nivelVisual >= 0) {
+            nivelTexto = niveles[nivelVisual];
+            if (nivelConBono >= 0) {
+                bonoTexto = formatNumber(pagos_array[nivelConBono]);
+            } else {
+                bonoTexto = '0';
+                if (nivelVisual === 0) {
+                    const falta = metas_array[0] - valor;
+                    const faltaTexto = tipo === 'cantidad' ? falta : formatNumber(falta);
+                    mensajeExtra = `<br><span style="color: #ff9800;">⚠️ Sin bono - Falta ${faltaTexto} para meta</span>`;
+                }
+            }
+        }
+        
+        info.innerHTML = `Progreso total: ${tipo === 'cantidad' ? valor : formatNumber(valor)} de ${tipo === 'cantidad' ? maxMeta : formatNumber(maxMeta)} (${progreso}%)<br>
+                         Nivel alcanzado: <strong>${nivelTexto}</strong> | Bono: <strong>${bonoTexto} Gs</strong>${mensajeExtra}`;
+        
+        // Retornar objeto con ambos niveles
+        return {
+            nivelVisual: nivelVisual,
+            nivelConBono: nivelConBono,
+            // Mantener compatibilidad con código existente
+            nivelAlcanzado: nivelConBono
+        };
         }
         
         // Cargar valor al hacer click
@@ -287,7 +335,7 @@
         }
         
         // Actualizar barra de carrera
-        function updateCarreraBar(nivelCarrera) {
+        function updateCarreraBar(nivelCarrera, nivelActualMes, nivelAnterior) {
             const container = document.getElementById('barraCarrera');
             const info = document.getElementById('infoCarrera');
             
@@ -305,26 +353,43 @@
                     className += ' current';
                 }
                 
-                const premio = pagos.carrera[i];
-                const premioTexto = premio > 0 ? formatNumber(premio) : '0';
-                
-                html += `<div class="${className}" style="${i < 2 ? 'opacity: 0.5;' : ''}">
-                    <div class="level">${niveles[i]}</div>
-                    <div class="premio">Premio: ${premioTexto}</div>
-                </div>`;
+                            const bono = pagos.carrera[i];
+            const bonoTexto = bono > 0 ? formatNumber(bono) : '0';
+            
+            html += `<div class="${className}" style="${i < 2 ? 'opacity: 0.5;' : ''}">
+                <div class="level">${niveles[i]}</div>
+                <div class="bono">Bono: ${bonoTexto}</div>
+            </div>`;
             }
             html += '</div>';
             container.innerHTML = html;
             
-            // Actualizar info
-            const nivelTexto = nivelCarrera >= 0 ? niveles[nivelCarrera] : 'Sin carrera';
-            const premioCarrera = nivelCarrera >= 0 ? pagos.carrera[nivelCarrera] : 0;
+                    // Actualizar info
+        const nivelTexto = nivelCarrera >= 0 ? niveles[nivelCarrera] : 'Sin carrera';
+        const bonoCarrera = nivelCarrera >= 0 ? pagos.carrera[nivelCarrera] : 0;
+        
+        // Mostrar información detallada de cómo se calculó
+        let detalle = '';
+        if (nivelActualMes >= 0 && nivelAnterior >= 0) {
+            const nivelActualTexto = niveles[nivelActualMes];
+            const nivelAnteriorTexto = niveles[nivelAnterior];
             
-            info.innerHTML = `Tu nivel de carrera: <strong>${nivelTexto}</strong> | 
-                             Premio: <strong>${formatNumber(premioCarrera)} Gs</strong><br>
-                             <span class="text-muted">Definido por el menor nivel de los últimos 2 meses</span>`;
-            
-            return premioCarrera;
+            if (nivelActualMes === nivelAnterior) {
+                detalle = `<span class="text-muted">Mes actual: ${nivelActualTexto} | Mes anterior: ${nivelAnteriorTexto} | Ambos iguales</span>`;
+            } else if (nivelActualMes < nivelAnterior) {
+                detalle = `<span class="text-muted">Mes actual: ${nivelActualTexto} | Mes anterior: ${nivelAnteriorTexto} | Se toma el menor (actual)</span>`;
+            } else {
+                detalle = `<span class="text-muted">Mes actual: ${nivelActualTexto} | Mes anterior: ${nivelAnteriorTexto} | Se toma el menor (anterior)</span>`;
+            }
+        } else {
+            detalle = `<span class="text-muted">Definido por el menor nivel entre mes actual y anterior</span>`;
+        }
+        
+        info.innerHTML = `Tu nivel de carrera: <strong>${nivelTexto}</strong> | 
+                         Bono: <strong>${formatNumber(bonoCarrera)} Gs</strong><br>
+                         ${detalle}`;
+        
+        return bonoCarrera;
         }
         
         // Actualizar tabla de multiplicadores clickeable
@@ -485,18 +550,29 @@
         
         // Actualizar llave de cantidad - SIMPLIFICADO
         function updateCantidadConLlave(cantidad, menorSemana) {
-            const nivelCantidad = updateProgressBar('cantidad', cantidad, 'barraCantidad', 'infoCantidad');
+            // Esta función ya no llama a updateProgressBar porque se llama desde updateFields
+            // Solo maneja la lógica de la llave semanal
             
-            let nivelLimitado = nivelCantidad;
-            let mensajeLlave = '';
-            
-            if (menorSemana < 2) {
-                nivelLimitado = -1;
-                mensajeLlave = '❌ Sin premio (requiere 2/sem)';
-            } else {
-                // Con 2/sem ya no hay límites
-                mensajeLlave = '✅ Premio habilitado (2/sem cumplido)';
+                    // Para mantener compatibilidad, simular el resultado de updateProgressBar
+        let nivelCantidadConBono = -1;
+        
+        // Calcular nivel con bono basado en las metas
+        for (let i = 0; i < metas.cantidad.length; i++) {
+            if (cantidad >= metas.cantidad[i]) {
+                nivelCantidadConBono = i;
             }
+        }
+        
+        let nivelLimitado = nivelCantidadConBono;
+        let mensajeLlave = '';
+        
+        if (menorSemana < 2) {
+            nivelLimitado = -1;
+            mensajeLlave = '❌ Sin bono (requiere 2/sem)';
+        } else {
+            // Con 2/sem ya no hay límites
+            mensajeLlave = '✅ Bono habilitado (2/sem cumplido)';
+        }
             
             const info = document.getElementById('infoCantidad');
             if (mensajeLlave) {
@@ -522,12 +598,12 @@
                 const limitante = limitantes.reduce((min, curr) => curr.nivel < min.nivel ? curr : min);
                 if (limitante.nivel < 5) {
                     const siguienteNivel = niveles[limitante.nivel + 1];
-                    const diferenciaPremio = pagos.carrera[limitante.nivel + 1] - pagos.carrera[limitante.nivel];
+                    const diferenciaBono = pagos.carrera[limitante.nivel + 1] - pagos.carrera[limitante.nivel];
                     
                     html += `<div class="suggestion-category high-priority">
                         <div class="suggestion-category-title">🚨 Tu Limitante Principal</div>
                         <div class="suggestion-item">Tu ${limitante.tipo} (${niveles[limitante.nivel]}) limita tu carrera. 
-                        Alcanzando ${siguienteNivel} en este indicador sumarías ${formatNumber(diferenciaPremio)} Gs en premio carrera.</div>
+                        Alcanzando ${siguienteNivel} en este indicador sumarías ${formatNumber(diferenciaBono)} Gs en bono carrera.</div>
                     </div>`;
                 }
             }
@@ -585,7 +661,7 @@
                 html += `<div class="suggestion-category multipliers">
                     <div class="suggestion-category-title">⚡ Mejora de Multiplicadores</div>
                     <div class="suggestion-item">Tu ${peorMultiplicador.nombre} (${peorMultiplicador.valor}%) es tu punto débil. 
-                    Subirla a ${peorMultiplicador.objetivo}% aumentaría tu comisión en ${formatNumber(mejora)} Gs.</div>
+                    Subirla a ${peorMultiplicador.objetivo}% aumentaría tus bonos en ${formatNumber(mejora)} Gs.</div>
                 </div>`;
             }
             
@@ -605,7 +681,7 @@
                     pagos.montoInterno[nivelObjetivo] + pagos.montoExterno[nivelObjetivo] + 
                     pagos.montoRecuperado[nivelObjetivo] + pagos.cantidad[nivelObjetivo] + 
                     (nivelObjetivo >= 3 ? pagos.equipo[nivelObjetivo] : 0);
-                objetivos.push(`Alcanzando todos los ${niveles[nivelObjetivo]} este mes = ${formatNumber(totalObjetivo)} Gs de comisión base`);
+                objetivos.push(`Alcanzando todos los ${niveles[nivelObjetivo]} este mes = ${formatNumber(totalObjetivo)} Gs de bonos base`);
             }
             
             if (objetivos.length > 0) {
@@ -622,13 +698,13 @@
             
             // Llave semanal
             if (datos.menorSemana < 2 && datos.cantidad >= 6) {
-                alertas.push(`Sin 2/sem no cobrás premio cantidad (perdés ${formatNumber(datos.bonusCantidadPotencial)} Gs)`);
+                alertas.push(`Sin 2/sem no cobrás bono cantidad (perdés ${formatNumber(datos.bonusCantidadPotencial)} Gs)`);
             }
             
             // Llave montos
             if (!datos.cumpleLlaveMonto && datos.nivelInterno >= 0) {
                 alertas.push(
-                    `Te faltan ${6 - datos.cantidad} desembolsos para activar premios de montos (int/ext/rec)`
+                    `Te faltan ${6 - datos.cantidad} desembolsos para activar bonos de montos (int/ext/rec)`
                 );
             }
 
@@ -665,14 +741,14 @@
                     className += ' current';
                 }
                 
-                // Los primeros 3 niveles no tienen premio
-                const premio = pagos.equipo[i];
-                const premioTexto = premio > 0 ? formatNumber(premio) : '0';
-                
-                html += `<div class="${className}" style="${i < 3 ? 'opacity: 0.5;' : ''}">
-                    <div class="level">${niveles[i]}</div>
-                    <div class="premio">Premio: ${premioTexto}</div>
-                </div>`;
+                            // Los primeros 3 niveles no tienen bono
+            const bono = pagos.equipo[i];
+            const bonoTexto = bono > 0 ? formatNumber(bono) : '0';
+            
+            html += `<div class="${className}" style="${i < 3 ? 'opacity: 0.5;' : ''}">
+                <div class="level">${niveles[i]}</div>
+                <div class="bono">Bono: ${bonoTexto}</div>
+            </div>`;
             }
             html += '</div>';
             container.innerHTML = html;
@@ -682,22 +758,22 @@
             const cumpleRequisito = nivelCarrera >= 2 && nivelEquipo >= 2;
             const bonusEquipo = cumpleRequisito ? pagos.equipo[nivelEquipo] : 0;
             
-            info.innerHTML = `Menor nivel del equipo: <strong>${equipoTexto}</strong> | 
-                             Tu nivel: <strong>${niveles[nivelCarrera]}</strong> | 
-                             Premio: <strong>${formatNumber(bonusEquipo)} Gs</strong>`;
+                    info.innerHTML = `Menor nivel del equipo: <strong>${equipoTexto}</strong> | 
+                         Tu nivel: <strong>${niveles[nivelCarrera]}</strong> | 
+                         Bono: <strong>${formatNumber(bonusEquipo)} Gs</strong>`;
             
             // Actualizar mensaje de requisitos
             if (nivelCarrera < 2) {
                 requisitos.style.display = 'block';
-                requisitos.innerHTML = '⚠️ Necesitas estar en Senior A+ para cobrar premio equipo';
+                requisitos.innerHTML = '⚠️ Necesitas estar en Senior A+ para cobrar bono equipo';
                 requisitos.style.background = '#FFF3E0';
             } else if (nivelEquipo < 2) {
                 requisitos.style.display = 'block';
-                requisitos.innerHTML = '⚠️ El equipo necesita estar en Senior A+ para activar premio';
+                requisitos.innerHTML = '⚠️ El equipo necesita estar en Senior A+ para activar bono';
                 requisitos.style.background = '#FFF3E0';
             } else {
                 requisitos.style.display = 'block';
-                requisitos.innerHTML = '✅ Premio equipo activado';
+                requisitos.innerHTML = '✅ Bono equipo activado';
                 requisitos.style.background = '#E8F5E9';
                 requisitos.style.color = '#2E7D32';
             }
@@ -765,20 +841,38 @@
                 menorSemanaInput.classList.add('empty');
             }
         
-            const nivelInterno = updateProgressBar('interno', values.montoInterno, 'barraInterno', 'infoInterno');
-            const nivelExterno = updateProgressBar('externo', values.montoExterno, 'barraExterno', 'infoExterno');
-            const nivelRecuperado = updateProgressBar('recuperado', values.montoRecuperado, 'barraRecuperado', 'infoRecuperado');
-            const nivelCantidadReal = updateProgressBar('cantidad', values.cantidad, 'barraCantidad', 'infoCantidad');
+            // Obtener niveles (ahora retorna objeto con nivelVisual y nivelConPremio)
+            const resultInterno = updateProgressBar('interno', values.montoInterno, 'barraInterno', 'infoInterno');
+            const resultExterno = updateProgressBar('externo', values.montoExterno, 'barraExterno', 'infoExterno');
+            const resultRecuperado = updateProgressBar('recuperado', values.montoRecuperado, 'barraRecuperado', 'infoRecuperado');
+            const resultCantidad = updateProgressBar('cantidad', values.cantidad, 'barraCantidad', 'infoCantidad');
             const nivelCantidadLimitado = updateCantidadConLlave(values.cantidad, values.menorSemana);
         
-            let nivelesAlcanzadosActual = [];
-            if (nivelInterno >= 0) nivelesAlcanzadosActual.push(nivelInterno);
-            if (nivelExterno >= 0) nivelesAlcanzadosActual.push(nivelExterno);
-            if (nivelRecuperado >= 0) nivelesAlcanzadosActual.push(nivelRecuperado);
-            if (nivelCantidadReal >= 0) nivelesAlcanzadosActual.push(nivelCantidadReal);
-            let nivelActualMes = nivelesAlcanzadosActual.length > 0 ? Math.min(...nivelesAlcanzadosActual) : 0;
+            // Extraer niveles con premio para carrera (solo estos cuentan para bonos)
+            const nivelInternoConPremio = resultInterno.nivelConPremio;
+            const nivelExternoConPremio = resultExterno.nivelConPremio;
+            const nivelRecuperadoConPremio = resultRecuperado.nivelConPremio;
+            const nivelCantidadConPremio = resultCantidad.nivelConPremio;
+        
+            // Extraer niveles visuales para mostrar en interfaz
+            const nivelInternoVisual = resultInterno.nivelVisual;
+            const nivelExternoVisual = resultExterno.nivelVisual;
+            const nivelRecuperadoVisual = resultRecuperado.nivelVisual;
+            const nivelCantidadVisual = resultCantidad.nivelVisual;
+        
+            // NIVEL PRINCIPAL: Basado en niveles VISUALES (muestra progreso sin importar metas)
+            let nivelesVisualesActual = [];
+            if (nivelInternoVisual >= 0) nivelesVisualesActual.push(nivelInternoVisual);
+            if (nivelExternoVisual >= 0) nivelesVisualesActual.push(nivelExternoVisual);
+            if (nivelRecuperadoVisual >= 0) nivelesVisualesActual.push(nivelRecuperadoVisual);
+            if (nivelCantidadVisual >= 0) nivelesVisualesActual.push(nivelCantidadVisual);
+            let nivelActualMes = nivelesVisualesActual.length > 0 ? Math.min(...nivelesVisualesActual) : 0;
+            
+            // Mostrar nivel principal puro (sin comparar con anterior)
+            document.getElementById('statNivel').textContent = niveles[nivelActualMes];
+            
+            // Nivel para cálculos internos (mantener la lógica actual para compatibilidad)
             const nivelActual = Math.min(nivelActualMes, values.nivelAnterior);
-            document.getElementById('statNivel').textContent = niveles[nivelActual];
         
             const multiplicadorTotal = updateMultiplicadorTables();
         
@@ -802,26 +896,51 @@
             document.getElementById('recuperadoLlave').className =
                 cumpleLlaveMonto ? 'llave text-success' : 'llave text-danger';
         
-            document.getElementById('internoStatus').textContent = nivelInterno >= 0 ? `\u2713 Nivel: ${niveles[nivelInterno]}` : '';
+            // Mostrar nivel visual en status (pero usar nivel con premio para cálculos)
+            document.getElementById('internoStatus').textContent = nivelInternoVisual >= 0 ? `\u2713 Nivel: ${niveles[nivelInternoVisual]}` : '';
             document.getElementById('cantidadStatus').textContent = values.cantidad >= metas.cantidad[nivelActual] ? `\u2713 ${values.cantidad} > meta ${metas.cantidad[nivelActual]}` : `${values.cantidad}/${metas.cantidad[nivelActual]}`;
         
-            let nivelesAlcanzados = [];
-            if (nivelInterno >= 0) nivelesAlcanzados.push(nivelInterno);
-            if (nivelExterno >= 0) nivelesAlcanzados.push(nivelExterno);
-            if (nivelRecuperado >= 0) nivelesAlcanzados.push(nivelRecuperado);
-            if (nivelCantidadReal >= 0) nivelesAlcanzados.push(nivelCantidadReal);
-            let nivelCarreraActualMes = nivelesAlcanzados.length > 0 ? Math.min(...nivelesAlcanzados) : -1;
-            let nivelCarrera = Math.min(nivelCarreraActualMes, values.nivelAnterior);
+            // BONO CARRERA: Basado en niveles VISUALES para mes actual, luego comparar con anterior
+            let nivelesVisualesCarrera = [];
+            if (nivelInternoVisual >= 0) nivelesVisualesCarrera.push(nivelInternoVisual);
+            if (nivelExternoVisual >= 0) nivelesVisualesCarrera.push(nivelExternoVisual);
+            if (nivelRecuperadoVisual >= 0) nivelesVisualesCarrera.push(nivelRecuperadoVisual);
+            if (nivelCantidadVisual >= 0) nivelesVisualesCarrera.push(nivelCantidadVisual);
+            let nivelCarreraActualMes = nivelesVisualesCarrera.length > 0 ? Math.min(...nivelesVisualesCarrera) : -1;
+            
+            // El bono carrera final es el menor entre actual y anterior
+            let nivelCarrera = -1;
+            if (nivelCarreraActualMes >= 0 && values.nivelAnterior >= 0) {
+                nivelCarrera = Math.min(nivelCarreraActualMes, values.nivelAnterior);
+            } else if (nivelCarreraActualMes >= 0) {
+                nivelCarrera = nivelCarreraActualMes;
+            } else if (values.nivelAnterior >= 0) {
+                nivelCarrera = values.nivelAnterior;
+            }
         
-            const bonusCarrera = updateCarreraBar(nivelCarrera);
+            const bonusCarrera = updateCarreraBar(nivelCarrera, nivelCarreraActualMes, values.nivelAnterior);
             const bonusEquipoCalculado = updateEquipoBar(values.nivelEquipo, nivelCarrera);
+            
+            // Debug: Mostrar en consola para validación
+            console.log('🔍 DEBUG NIVELES:');
+            console.log('- Nivel Principal (visual):', niveles[nivelActualMes], '(índice:', nivelActualMes, ')');
+            console.log('- Nivel Carrera Actual (visual):', nivelCarreraActualMes >= 0 ? niveles[nivelCarreraActualMes] : 'Sin carrera', '(índice:', nivelCarreraActualMes, ')');
+            console.log('- Nivel Anterior:', values.nivelAnterior >= 0 ? niveles[values.nivelAnterior] : 'Sin nivel', '(índice:', values.nivelAnterior, ')');
+            console.log('- Nivel Carrera Final (menor):', nivelCarrera >= 0 ? niveles[nivelCarrera] : 'Sin carrera', '(índice:', nivelCarrera, ')');
         
             return {
-                nivelInterno,
-                nivelExterno,
-                nivelRecuperado,
-                nivelCantidadReal,
+                // Niveles con premio (para cálculos de bonos)
+                nivelInterno: nivelInternoConPremio,
+                nivelExterno: nivelExternoConPremio,
+                nivelRecuperado: nivelRecuperadoConPremio,
+                nivelCantidadReal: nivelCantidadConPremio,
                 nivelCantidadLimitado,
+                // Niveles visuales (para mostrar en interfaz)
+                nivelInternoVisual,
+                nivelExternoVisual,
+                nivelRecuperadoVisual,
+                nivelCantidadVisual,
+                // Resto de datos
                 multiplicadorTotal,
                 nivelCarrera,
                 nivelCarreraActualMes,
@@ -898,7 +1017,7 @@
                 document.getElementById('calcMultiplicador').textContent = (result.multiplicadorTotal * 100).toFixed(1) + '%';
                 document.getElementById('totalComision').textContent = formatNumber(result.total) + ' Gs';
                 if (info.nivelCantidadLimitado < info.nivelCantidadReal && values.menorSemana < 2) {
-                    document.getElementById('cantidadLlaveInfo').innerHTML = '<span class="tooltip" data-tip="Sin premio por llave semanal">\u26A0\uFE0F</span>';
+                    document.getElementById('cantidadLlaveInfo').innerHTML = '<span class="tooltip" data-tip="Sin bono por llave semanal">\u26A0\uFE0F</span>';
                 } else {
                     document.getElementById('cantidadLlaveInfo').textContent = '';
                 }
@@ -1210,7 +1329,7 @@ function loadAdminValues() {
     const currentConfig = getConfig();
     
     // Nombre del sistema
-    const nombreSistema = currentConfig.sistemaConfig?.nombre || '💰 Sistema de Comisiones Comerciales';
+    const nombreSistema = currentConfig.sistemaConfig?.nombre || '💰 Sistema de Bonos Comerciales';
     const sistemaInput = document.getElementById('admin-sistema-nombre');
     if (sistemaInput) {
         sistemaInput.value = nombreSistema;
@@ -1249,21 +1368,21 @@ function loadAdminValues() {
         if (metaCantidadInput) metaCantidadInput.value = currentConfig.metas.cantidad[i];
     }
     
-    // Premios
+    // Bonos
     for (let i = 0; i < 6; i++) {
-        const premioCarreraInput = document.getElementById(`admin-premio-carrera-${i}`);
-        const premioInternoInput = document.getElementById(`admin-premio-interno-${i}`);
-        const premioExternoInput = document.getElementById(`admin-premio-externo-${i}`);
-        const premioRecuperadoInput = document.getElementById(`admin-premio-recuperado-${i}`);
-        const premioCantidadInput = document.getElementById(`admin-premio-cantidad-${i}`);
-        const premioEquipoInput = document.getElementById(`admin-premio-equipo-${i}`);
+        const bonoCarreraInput = document.getElementById(`admin-bono-carrera-${i}`);
+        const bonoInternoInput = document.getElementById(`admin-bono-interno-${i}`);
+        const bonoExternoInput = document.getElementById(`admin-bono-externo-${i}`);
+        const bonoRecuperadoInput = document.getElementById(`admin-bono-recuperado-${i}`);
+        const bonoCantidadInput = document.getElementById(`admin-bono-cantidad-${i}`);
+        const bonoEquipoInput = document.getElementById(`admin-bono-equipo-${i}`);
         
-        if (premioCarreraInput) premioCarreraInput.value = formatNumber(currentConfig.pagos.carrera[i]);
-        if (premioInternoInput) premioInternoInput.value = formatNumber(currentConfig.pagos.montoInterno[i]);
-        if (premioExternoInput) premioExternoInput.value = formatNumber(currentConfig.pagos.montoExterno[i]);
-        if (premioRecuperadoInput) premioRecuperadoInput.value = formatNumber(currentConfig.pagos.montoRecuperado[i]);
-        if (premioCantidadInput) premioCantidadInput.value = formatNumber(currentConfig.pagos.cantidad[i]);
-        if (premioEquipoInput) premioEquipoInput.value = formatNumber(currentConfig.pagos.equipo[i]);
+        if (bonoCarreraInput) bonoCarreraInput.value = formatNumber(currentConfig.pagos.carrera[i]);
+        if (bonoInternoInput) bonoInternoInput.value = formatNumber(currentConfig.pagos.montoInterno[i]);
+        if (bonoExternoInput) bonoExternoInput.value = formatNumber(currentConfig.pagos.montoExterno[i]);
+        if (bonoRecuperadoInput) bonoRecuperadoInput.value = formatNumber(currentConfig.pagos.montoRecuperado[i]);
+        if (bonoCantidadInput) bonoCantidadInput.value = formatNumber(currentConfig.pagos.cantidad[i]);
+        if (bonoEquipoInput) bonoEquipoInput.value = formatNumber(currentConfig.pagos.equipo[i]);
     }
     
     // Configurar listeners para nombres dinámicos y título
@@ -1525,7 +1644,7 @@ function mostrarMensajeBienvenida() {
         font-weight: 600;
         animation: slideInRight 0.3s ease;
     `;
-    mensaje.innerHTML = `✅ ¡Bienvenido al Sistema de Comisiones!`;
+    mensaje.innerHTML = `✅ ¡Bienvenido al Sistema de Bonos!`;
     
     document.body.appendChild(mensaje);
     
@@ -1643,7 +1762,7 @@ function setupSystemNameListener() {
     const sistemaInput = document.getElementById('admin-sistema-nombre');
     if (sistemaInput) {
         sistemaInput.addEventListener('input', function() {
-            const nuevoNombre = this.value || '💰 Sistema de Comisiones Comerciales';
+            const nuevoNombre = this.value || '💰 Sistema de Bonos Comerciales';
             
             // Verificar si existe el elemento preview (opcional)
             const previewElement = document.getElementById('preview-sistema-nombre');
@@ -1663,7 +1782,7 @@ function setupSystemNameListener() {
 // Función para aplicar el nombre del sistema guardado
 function applySystemName() {
     const currentConfig = getConfig();
-    const nombreSistema = currentConfig.sistemaConfig?.nombre || '💰 Sistema de Comisiones Comerciales';
+    const nombreSistema = currentConfig.sistemaConfig?.nombre || '💰 Sistema de Bonos Comerciales';
     
     const tituloH1 = document.querySelector('.header h1');
     if (tituloH1) {
@@ -1702,12 +1821,12 @@ function getAdminConfig() {
         newConfig.metas.montoRecuperado.push(parseInt(limpiarFormatoAdmin(document.getElementById(`admin-meta-recuperado-${i}`).value), 10) || 0);
         newConfig.metas.cantidad.push(parseInt(document.getElementById(`admin-meta-cantidad-${i}`).value, 10) || 0);
 
-        newConfig.pagos.carrera.push(parseInt(limpiarFormatoAdmin(document.getElementById(`admin-premio-carrera-${i}`).value), 10) || 0);
-        newConfig.pagos.montoInterno.push(parseInt(limpiarFormatoAdmin(document.getElementById(`admin-premio-interno-${i}`).value), 10) || 0);
-        newConfig.pagos.montoExterno.push(parseInt(limpiarFormatoAdmin(document.getElementById(`admin-premio-externo-${i}`).value), 10) || 0);
-        newConfig.pagos.montoRecuperado.push(parseInt(limpiarFormatoAdmin(document.getElementById(`admin-premio-recuperado-${i}`).value), 10) || 0);
-        newConfig.pagos.cantidad.push(parseInt(limpiarFormatoAdmin(document.getElementById(`admin-premio-cantidad-${i}`).value), 10) || 0);
-        newConfig.pagos.equipo.push(parseInt(limpiarFormatoAdmin(document.getElementById(`admin-premio-equipo-${i}`).value), 10) || 0);
+        newConfig.pagos.carrera.push(parseInt(limpiarFormatoAdmin(document.getElementById(`admin-bono-carrera-${i}`).value), 10) || 0);
+        newConfig.pagos.montoInterno.push(parseInt(limpiarFormatoAdmin(document.getElementById(`admin-bono-interno-${i}`).value), 10) || 0);
+        newConfig.pagos.montoExterno.push(parseInt(limpiarFormatoAdmin(document.getElementById(`admin-bono-externo-${i}`).value), 10) || 0);
+        newConfig.pagos.montoRecuperado.push(parseInt(limpiarFormatoAdmin(document.getElementById(`admin-bono-recuperado-${i}`).value), 10) || 0);
+        newConfig.pagos.cantidad.push(parseInt(limpiarFormatoAdmin(document.getElementById(`admin-bono-cantidad-${i}`).value), 10) || 0);
+        newConfig.pagos.equipo.push(parseInt(limpiarFormatoAdmin(document.getElementById(`admin-bono-equipo-${i}`).value), 10) || 0);
     }
 
     // Leer multiplicadores
@@ -1753,7 +1872,7 @@ function validateAndSaveConfig() {
         }
         
         // Guardar configuración
-        localStorage.setItem('comisionesConfig', JSON.stringify(config));
+        localStorage.setItem('bonosConfig', JSON.stringify(config));
         
         // Actualizar cálculos
         updateCalculations();
@@ -1917,8 +2036,8 @@ function previewChanges() {
         localStorage.setItem('tempConfig', JSON.stringify(config));
         
         // Simular aplicación de cambios
-        const originalConfig = localStorage.getItem('comisionesConfig');
-        localStorage.setItem('comisionesConfig', JSON.stringify(config));
+        const originalConfig = localStorage.getItem('bonosConfig');
+        localStorage.setItem('bonosConfig', JSON.stringify(config));
         
         // Actualizar cálculos
         updateCalculations();
@@ -1928,9 +2047,9 @@ function previewChanges() {
         // Restaurar configuración original después de 10 segundos
         setTimeout(() => {
             if (originalConfig) {
-                localStorage.setItem('comisionesConfig', originalConfig);
+                localStorage.setItem('bonosConfig', originalConfig);
             } else {
-                localStorage.removeItem('comisionesConfig');
+                localStorage.removeItem('bonosConfig');
             }
             updateCalculations();
             showAdminMessage('↩️ Vista previa finalizada. Configuración restaurada.', 'info');
@@ -2002,7 +2121,7 @@ function exportConfigJS() {
             return;
         }
         
-        const jsContent = `// Configuración del Sistema de Comisiones Comerciales
+        const jsContent = `// Configuración del Sistema de Bonos Comerciales
 // Este archivo contiene todos los valores configurables del sistema
 // Para modificar valores, usar el Panel de Administración
 
@@ -2091,7 +2210,7 @@ function handleFileImport(event) {
             }
             
             // Aplicar configuración
-            localStorage.setItem('comisionesConfig', JSON.stringify(config));
+            localStorage.setItem('bonosConfig', JSON.stringify(config));
             loadAdminData();
             updateCalculations();
             
@@ -2109,7 +2228,7 @@ function handleFileImport(event) {
 // Restaurar valores por defecto
 function restoreDefaults() {
     if (confirm('⚠️ ¿Estás seguro? Esto restaurará toda la configuración a los valores originales y se perderán todos los cambios.')) {
-        localStorage.removeItem('comisionesConfig');
+        localStorage.removeItem('bonosConfig');
         loadAdminData();
         updateCalculations();
         showAdminMessage('✅ Configuración restaurada a valores por defecto', 'success');
@@ -2120,7 +2239,7 @@ function restoreDefaults() {
 // Limpiar configuración local
 function clearLocalStorage() {
     if (confirm('⚠️ ¿Estás seguro? Esto eliminará toda la configuración guardada localmente.')) {
-        localStorage.removeItem('comisionesConfig');
+        localStorage.removeItem('bonosConfig');
         localStorage.removeItem('draftCommission');
         localStorage.removeItem('tempConfig');
         showAdminMessage('✅ Configuración local eliminada', 'success');

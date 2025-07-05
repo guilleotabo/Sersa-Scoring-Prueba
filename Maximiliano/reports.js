@@ -1,4 +1,4 @@
-// Generador de Reporte Digital para Sistema de Comisiones
+// Generador de Reporte Digital para Sistema de Bonos
 // Función para formatear números con puntos
 function formatNumber(num) {
     return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -37,14 +37,14 @@ function generarPDFMejorado() {
     const totalDesembolsado = montoInterno + montoExterno + montoRecuperado;
     const cantidadDesembolsos = getValue('cantidadDesembolsos') || '0';
     
-    // Valores de premios para el gráfico
-    const premioBase = parseInt(getValue('calcBase', 'textContent').replace(/[^0-9]/g, '') || '0');
-    const premioCarrera = parseInt(getValue('calcCarrera', 'textContent').replace(/[^0-9]/g, '') || '0');
-    const premioInterno = parseInt(getValue('calcInterno', 'textContent').replace(/[^0-9]/g, '') || '0');
-    const premioExterno = parseInt(getValue('calcExterno', 'textContent').replace(/[^0-9]/g, '') || '0');
-    const premioRecuperado = parseInt(getValue('calcRecuperado', 'textContent').replace(/[^0-9]/g, '') || '0');
-    const premioCantidad = parseInt(getValue('calcCantidad', 'textContent').replace(/[^0-9]/g, '') || '0');
-    const premioEquipo = parseInt(getValue('calcEquipo', 'textContent').replace(/[^0-9]/g, '') || '0');
+    // Valores de bonos para el gráfico
+    const bonoBase = parseInt(getValue('calcBase', 'textContent').replace(/[^0-9]/g, '') || '0');
+    const bonoCarrera = parseInt(getValue('calcCarrera', 'textContent').replace(/[^0-9]/g, '') || '0');
+    const bonoInterno = parseInt(getValue('calcInterno', 'textContent').replace(/[^0-9]/g, '') || '0');
+    const bonoExterno = parseInt(getValue('calcExterno', 'textContent').replace(/[^0-9]/g, '') || '0');
+    const bonoRecuperado = parseInt(getValue('calcRecuperado', 'textContent').replace(/[^0-9]/g, '') || '0');
+    const bonoCantidad = parseInt(getValue('calcCantidad', 'textContent').replace(/[^0-9]/g, '') || '0');
+    const bonoEquipo = parseInt(getValue('calcEquipo', 'textContent').replace(/[^0-9]/g, '') || '0');
     
     // Crear ventana de impresión
     const ventana = window.open('', '_blank');
@@ -54,7 +54,7 @@ function generarPDFMejorado() {
         <html>
         <head>
             <meta charset="UTF-8">
-            <title>Reporte de Comisiones - ${mesActual}</title>
+            <title>Reporte de Bonos - ${mesActual}</title>
             <style>
                 * {
                     margin: 0;
@@ -367,7 +367,7 @@ function generarPDFMejorado() {
             <div class="container">
                 <!-- Header -->
                 <div class="header">
-                    <h1>Reporte de Comisiones</h1>
+                    <h1>Reporte de Bonos</h1>
                     <div class="subtitle">SERSA SAECA - Sistema Comercial</div>
                     <div class="date">Período: ${mesActual}</div>
                 </div>
@@ -375,7 +375,7 @@ function generarPDFMejorado() {
                 <!-- Cards de resumen -->
                 <div class="summary-grid">
                     <div class="summary-card primary">
-                        <div class="label">Comisión Total</div>
+                        <div class="label">Bonos Totales</div>
                         <div class="value">${comisionTotal}</div>
                         <div class="detail">Guaraníes</div>
                     </div>
@@ -510,9 +510,9 @@ function generarPDFMejorado() {
                     </table>
                 </div>
                 
-                <!-- Distribución de Comisión -->
+                <!-- Distribución de Bonos -->
                 <div class="section">
-                    <h2 class="section-title">💰 Distribución de Comisión</h2>
+                    <h2 class="section-title">💰 Distribución de Bonos</h2>
                     
                     <div class="chart-container">
                         <canvas id="pieChart" width="300" height="300"></canvas>
@@ -529,14 +529,14 @@ function generarPDFMejorado() {
                             </tr>
                         </thead>
                         <tbody>
-                            ${generarFilasDesglose(premioBase, premioCarrera, premioInterno, premioExterno, premioRecuperado, premioCantidad, premioEquipo, subtotal)}
+                            ${generarFilasDesglose(bonoBase, bonoCarrera, bonoInterno, bonoExterno, bonoRecuperado, bonoCantidad, bonoEquipo, subtotal)}
                         </tbody>
                     </table>
                 </div>
                 
                 <!-- Total Final -->
                 <div class="total-section">
-                    <div class="total-label">COMISIÓN TOTAL DEL MES</div>
+                    <div class="total-label">BONOS TOTALES DEL MES</div>
                     <div class="total-amount">${comisionTotal}</div>
                     <div style="font-size: 14px; opacity: 0.9;">
                         Subtotal: ${subtotal} × Multiplicador: ${multiplicadorFinal}
@@ -546,7 +546,7 @@ function generarPDFMejorado() {
                 <!-- Footer -->
                 <div class="footer">
                     <p>Reporte generado el ${fechaHora}</p>
-                    <p>Sistema de Comisiones Comerciales - SERSA SAECA</p>
+                    <p>Sistema de Bonos Comerciales - SERSA SAECA</p>
                 </div>
             </div>
             
@@ -561,13 +561,13 @@ function generarPDFMejorado() {
                     
                     // Datos del gráfico
                     const data = [
-                        ${premioBase > 0 ? `{label: 'Base Fija', value: ${premioBase}, color: '#006D77'}` : ''},
-                        ${premioCarrera > 0 ? `{label: 'Carrera', value: ${premioCarrera}, color: '#83C5BE'}` : ''},
-                        ${premioInterno > 0 ? `{label: 'Interno', value: ${premioInterno}, color: '#4CAF50'}` : ''},
-                        ${premioExterno > 0 ? `{label: 'Externo', value: ${premioExterno}, color: '#FFA726'}` : ''},
-                        ${premioRecuperado > 0 ? `{label: 'Recuperados', value: ${premioRecuperado}, color: '#AB47BC'}` : ''},
-                        ${premioCantidad > 0 ? `{label: 'Cantidad', value: ${premioCantidad}, color: '#EF5350'}` : ''},
-                        ${premioEquipo > 0 ? `{label: 'Equipo', value: ${premioEquipo}, color: '#42A5F5'}` : ''}
+                                ${bonoBase > 0 ? `{label: 'Base Fija', value: ${bonoBase}, color: '#006D77'}` : ''},
+        ${bonoCarrera > 0 ? `{label: 'Carrera', value: ${bonoCarrera}, color: '#83C5BE'}` : ''},
+        ${bonoInterno > 0 ? `{label: 'Interno', value: ${bonoInterno}, color: '#4CAF50'}` : ''},
+        ${bonoExterno > 0 ? `{label: 'Externo', value: ${bonoExterno}, color: '#FFA726'}` : ''},
+        ${bonoRecuperado > 0 ? `{label: 'Recuperados', value: ${bonoRecuperado}, color: '#AB47BC'}` : ''},
+        ${bonoCantidad > 0 ? `{label: 'Cantidad', value: ${bonoCantidad}, color: '#EF5350'}` : ''},
+        ${bonoEquipo > 0 ? `{label: 'Equipo', value: ${bonoEquipo}, color: '#42A5F5'}` : ''}
                     ].filter(item => item);
                     
                     const total = data.reduce((sum, item) => sum + item.value, 0);
@@ -686,12 +686,12 @@ function generarFilasDesglose(base, carrera, interno, externo, recuperado, canti
     
     const items = [
         {nombre: 'Base Fija', valor: base},
-        {nombre: 'Premio Carrera', valor: carrera},
-        {nombre: 'Premio Monto Interno', valor: interno},
-        {nombre: 'Premio Monto Externo', valor: externo},
-        {nombre: 'Premio Recuperados', valor: recuperado},
-        {nombre: 'Premio Cantidad', valor: cantidad},
-        {nombre: 'Premio Equipo', valor: equipo}
+        {nombre: 'Bono Carrera', valor: carrera},
+        {nombre: 'Bono Monto Interno', valor: interno},
+        {nombre: 'Bono Monto Externo', valor: externo},
+        {nombre: 'Bono Recuperados', valor: recuperado},
+        {nombre: 'Bono Cantidad', valor: cantidad},
+        {nombre: 'Bono Equipo', valor: equipo}
     ];
     
     items.forEach(item => {

@@ -327,8 +327,24 @@
         }
         
         .progress-segment.current {
-            background: #006D77;
+            background: #C8E6C9;
+            color: #2E7D32;
+            font-weight: 600;
+            border: 2px solid #2E7D32;
+        }
+        
+        .progress-segment.current-no-prize {
+            background: #ff9800;
             color: white;
+            position: relative;
+        }
+        
+        .progress-segment.current-no-prize::after {
+            content: '⚠️';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 8px;
         }
         
         .progress-segment .level {
@@ -342,7 +358,7 @@
             opacity: 0.8;
         }
         
-        .progress-segment .premio {
+        .progress-segment .bono {
             font-size: 10px;
             font-weight: 600;
             margin-top: 2px;
@@ -411,7 +427,7 @@
             padding: 2px 0;
         }
         
-        /* Cálculo de comisión compacto */
+        /* Cálculo de bonos compacto */
         .commission-calculation {
             display: grid;
             grid-template-columns: 1fr 1fr;

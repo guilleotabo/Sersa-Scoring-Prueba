@@ -1,6 +1,6 @@
-# 💰 Sistema de Comisiones Comerciales - SERSA SAECA
+# 💰 Sistema de Bonos Comerciales - SERSA SAECA
 
-Sistema web para calcular comisiones comerciales con panel de administración integrado.
+Sistema web para calcular bonos comerciales con panel de administración integrado.
 
 ## 📁 Estructura de Archivos
 
@@ -14,11 +14,11 @@ Sistema web para calcular comisiones comerciales con panel de administración in
 
 ### Estilos
 - **`styles.css`** - Hojas de estilo principales de la aplicación
-- **`comisiones.css`** - Estilos específicos para componentes y login
+- **`bonos.css`** - Estilos específicos para componentes y login
 
 ### Documentación
 - **`README.md`** - Este archivo de documentación
-- **`LICENSE`** - Licencia del proyecto
+- **`LICENSE`** - Licencia del proyecto (en la raíz del repositorio)
 
 ## 🚀 Uso
 
@@ -39,7 +39,7 @@ Sistema web para calcular comisiones comerciales con panel de administración in
 
 El sistema se configura mediante el archivo `config.js` que contiene:
 - Metas por nivel
-- Premios por nivel  
+- Bonos por nivel  
 - Multiplicadores (Conversión, Empatía, Proceso, Mora)
 - Base fija
 - Nombres de niveles
@@ -47,7 +47,7 @@ El sistema se configura mediante el archivo `config.js` que contiene:
 ## 🔧 Características
 
 - ✅ Sistema de login con contraseña
-- ✅ Cálculo automático de comisiones
+- ✅ Cálculo automático de bonos
 - ✅ Validación de campos obligatorios
 - ✅ Sistema de multiplicadores en cadena
 - ✅ Panel de administración integrado
@@ -64,7 +64,7 @@ El sistema se configura mediante el archivo `config.js` que contiene:
 - Cantidad de desembolsos
 - Sistema de llaves (6 desembolsos mínimos, 2 por semana)
 - Multiplicadores por calidad (Conversión, Empatía, Proceso, Mora)
-- Premio carrera y equipo
+- Bono carrera y equipo
 
 ### Administración
 - Edición de todas las configuraciones
@@ -83,5 +83,5 @@ El sistema se configura mediante el archivo `config.js` que contiene:
 
 ## 📝 Licencia
 
-Distribuido bajo los términos de la licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más información.
+Distribuido bajo los términos de la licencia MIT. Consulta el archivo [LICENSE](../LICENSE) para más información.
 GT
